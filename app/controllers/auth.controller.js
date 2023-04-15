@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../db/models/user.model');
-const { server_error, new_user_registeration_successfull, user_already_exists }  = require('../utils/messages');
+const { server_error, new_user_registeration_successfull, user_already_exists, login_success, login_failed }  = require('../utils/messages');
 const { SALT_ROUNDS } = require('../utils/config');
 
 const registerUserUsingEmailAndPassword = async ( req, res)=>{
@@ -47,6 +47,45 @@ const registerUserUsingEmailAndPassword = async ( req, res)=>{
     }
 }
 
+const loginUserUsingEmailAndPassword = async ( req, res ) => {
+    try{
+
+        const { email, password } = req.body.data;
+
+        const user = await User.findOne({
+            email : email
+        });
+
+        if(!user){
+            return res.status(login_failed.code).json({
+                status  : 'error',
+                message : login_failed.message 
+            })
+        }
+
+        const password_comparison = await bcrypt.compare(password,user.password);
+        
+        if(!password_comparison){
+            return res.status(login_failed.code).json({
+                status  : 'error',
+                message : login_failed.message 
+            })
+        }else {
+            return res.status(login_success.code).json({
+                status : 'success',
+                message : login_success.message
+            })
+        }
+    }catch(err){
+        res.status(server_error.code).json({
+            status  : 'error',
+            message : server_error.message
+        })
+    }
+}
+
+
 module.exports = {
-    registerUserUsingEmailAndPassword
+    registerUserUsingEmailAndPassword,
+    loginUserUsingEmailAndPassword
 }

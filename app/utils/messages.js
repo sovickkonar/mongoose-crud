@@ -10,5 +10,13 @@ module.exports = {
     user_already_exists : {
         code : 409,
         message : 'User already exists!'
+    },
+    login_failed : {
+        code : 401,
+        message : 'Login failed'
+    },
+    login_success : {
+        code : 200,
+        message : 'Login successful'
     }
 }
