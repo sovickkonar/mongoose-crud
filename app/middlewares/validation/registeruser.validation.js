@@ -1,5 +1,5 @@
 const Joi = require('joi');
-
+const { server_error } = require('../../utils/messages');
 exports.registerUserValidation = (req,res,next)=>{
     try{
 
@@ -54,9 +54,9 @@ exports.registerUserValidation = (req,res,next)=>{
         }
 
     }catch(err){
-        return res.status(500).json({
-            status  :  'error',
-            message : 'Internal Server Error: Oops, something went wrong on the server.'
+        return res.status(server_error.code).json({
+            status  :'error',
+            message : server_error.message
         })
     }
 }

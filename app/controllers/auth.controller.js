@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../db/models/user.model');
+const { server_error, new_user_registeration_successfull, user_already_exists }  = require('../utils/messages');
+const { SALT_ROUNDS } = require('../utils/config');
 
 const registerUserUsingEmailAndPassword = async ( req, res)=>{
     try{
@@ -12,13 +14,13 @@ const registerUserUsingEmailAndPassword = async ( req, res)=>{
         });
 
         if(user_exists){
-            return res.status(401).json({
+            return res.status(user_already_exists.code).json({
                 status   :  'error',
-                message  : ' user exists'
+                message  : user_already_exists.message
             });
         }else{
 
-            const hashed_password = await bcrypt.hash(password,10);
+            const hashed_password = await bcrypt.hash(password,parseInt(SALT_ROUNDS));
             
             let new_user = new User({
                 email : email,
@@ -31,15 +33,16 @@ const registerUserUsingEmailAndPassword = async ( req, res)=>{
             await new_user.save();
         }
         
-        return res.status(201).json({
+        return res.status(new_user_registeration_successfull.code).json({
             status : "success",
-            message : 'new user registered successfully'
+            message : new_user_registeration_successfull.message
         })
 
     }catch(err){
-        return res.status(500).json({
+        console.log(err.message);
+        return res.status(server_error.code).json({
             status   : 'error',
-            message  : 'server error'
+            message  : server_error.message
         })
     }
 }
