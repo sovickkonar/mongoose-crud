@@ -1,15 +1,11 @@
 const express = require('express');
-
-
-const base_routes = require('./routes');
-
+const helmet  = require('helmet');
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({
     extended : false
 }));
-app.use('/api',base_routes);
-
+app.use(helmet());
 
 module.exports = app;
