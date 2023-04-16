@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
+const jwt    = require('jsonwebtoken'); 
 const User = require('../db/models/user.model');
 const { server_error, new_user_registeration_successfull, user_already_exists, login_success, login_failed }  = require('../utils/messages');
-const { SALT_ROUNDS } = require('../utils/config');
+const { SALT_ROUNDS, SECRET_KEY, JWT_REFRESH_SECRET } = require('../utils/config');
 
 const registerUserUsingEmailAndPassword = async ( req, res)=>{
     try{
@@ -71,10 +72,29 @@ const loginUserUsingEmailAndPassword = async ( req, res ) => {
                 message : login_failed.message 
             })
         }else {
+
+            // create Tokens
+            const token_body = {
+                email : user.email,
+                name  : user.name
+            };
+
+            const auth_token = jwt.sign(token_body,SECRET_KEY,{
+                expiresIn : '10s'
+            });
+
+            const refresh_token = jwt.sign(token_body,JWT_REFRESH_SECRET,{
+                expiresIn : '1m'
+            });
+
             return res.status(login_success.code).json({
                 status : 'success',
-                message : login_success.message
-            })
+                message : login_success.message,
+                auth_token : auth_token,
+                refresh_token : refresh_token,
+                role : user.role
+            });
+
         }
     }catch(err){
         res.status(server_error.code).json({
